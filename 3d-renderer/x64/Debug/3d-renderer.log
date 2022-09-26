@@ -1,0 +1,7 @@
+﻿  Main.c
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\Main.c(5,1): warning C4026: function declared with formal parameter list
+Main.obj : error LNK2019: unresolved external symbol SDL_Init referenced in function SDL_main
+MSVCRTD.lib(exe_main.obj) : error LNK2019: unresolved external symbol main referenced in function "int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ)
+B:\Projects\visual-studio\3d-renderer\dependencies\SDL2-2.24.0\lib\x86\SDL2.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+B:\Projects\visual-studio\3d-renderer\dependencies\SDL2-2.24.0\lib\x86\SDL2main.lib : warning LNK4272: library machine type 'x86' conflicts with target machine type 'x64'
+B:\Projects\visual-studio\3d-renderer\x64\Debug\3d-renderer.exe : fatal error LNK1120: 2 unresolved externals
