@@ -91,16 +91,13 @@ void render_color_buffer(void)
 }
 
 
-void draw_grid(uint32_t color1, uint32_t color2)
+void draw_grid(uint32_t color)
 {
-	for (int y = 0; y < window_height; y++)
+	for (int y = 0; y < window_height; y += 10) 
 	{
-		for (int x = 0; x < window_width; x++)
+		for (int x = 0; x < window_width; x += 10) 
 		{
-			if (y % 10 == 0 || x % 10 == 0)
-				color_buffer[(window_width * y) + x] = color1;
-			else
-				color_buffer[(window_width * y) + x] = color2;
+			color_buffer[(window_width * y) + x] = color;
 		}
 	}
 }
@@ -114,7 +111,19 @@ void draw_rectangle(int x, int y, int width, int height, uint32_t color)
 			int current_x = x + i;
 			int current_y = y + j;
 
-			color_buffer[(window_width * current_y) + current_x] = color;
+			draw_pixel(current_x, current_y, color);
 		}
 	}
+}
+
+/*
+	With this color buffer, the pixels are being represent in memory as a 1d array. 
+	So your screen is not 1920x1080 to the array, it is a big 2,073,600 row of uint32_t (your pixels).
+	you can find pixels using 2D cords with this equation. So if you pass in x = 30 y = 20, then you will
+	get to index 38,430 for that pixel. The equation would look like ((1920 * 20) + 30).
+*/
+void draw_pixel(int x, int y, uint32_t color)
+{
+	if(x >= 0 && x < window_width && y >= 0 && y < window_height)
+		color_buffer[(window_width * y) + x] = color;
 }
