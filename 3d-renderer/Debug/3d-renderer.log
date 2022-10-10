@@ -1,4 +1,11 @@
 ﻿  main.c
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(53,36): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(53,76): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(52,31): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(52,48): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(53,31): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(53,48): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(54,31): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(54,48): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(80,25): warning C4305: '+=': truncation from 'double' to 'float'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(81,25): warning C4305: '+=': truncation from 'double' to 'float'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(82,25): warning C4305: '+=': truncation from 'double' to 'float'
   3d-renderer.vcxproj -> B:\Projects\visual-studio\3d-renderer\Debug\3d-renderer.exe

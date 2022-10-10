@@ -5,16 +5,15 @@
 
 #include "display.h"
 #include "vector.h"
+#include "mesh.h"
 
-
+triangle tris_to_render[N_MESH_FACES];
 
 bool is_running = false;
-
-#define N_POINTS (9 * 9 * 9)
-vec3 cube_points[N_POINTS]; //9 x 9 x 9 
-vec2 projected_points[N_POINTS];
+Uint32 previous_frame_time = 0;
 
 vec3 camera_pos = { 0, 0, -5 };
+vec3 cube_rotation = { .x = 0, .y = 0, .z = 0 };
 float fov = 650;
 
 void setup(void);
@@ -46,13 +45,14 @@ void render(void)
 {
 	draw_grid(0xFF141414);
 
-	// Loop over all projected points and render
-	for (int i = 0; i < N_POINTS; i++)
+	// Loop over all projected tris and render
+	for (int i = 0; i < N_MESH_FACES; i++)
 	{
-		vec2 projected_point = projected_points[i];
-		draw_rectangle(projected_point.x + (window_width / 2), projected_point.y + (window_height / 2), 4, 4, 0xFF00FF);
+		triangle tri = tris_to_render[i];
+		draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFFFF00FF);
+		draw_rectangle(tri.points[1].x, tri.points[1].y, 3, 3, 0xFFFF00FF);
+		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFFFF00FF);
 	}
-
 
 	render_color_buffer();
 	clear_color_buffer(0xFF000000);
@@ -66,40 +66,56 @@ void setup(void)
 
 	// Creating a SDL texture that is used to display the color buffer.
 	color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height);
-	
-	// creating the cube array
-	int point_count = 0;
-	for (float x = -1; x <= 1; x += 0.25) 
-	{
-		for (float y = -1; y <= 1; y += 0.25) 
-		{
-			for (float z = -1; z <= 1; z += 0.25) 
-			{
-				vec3 new_point = { .x = x, .y = y, .z = z };
-				cube_points[point_count++] = new_point;
-			}
-		}
-	}
 }
 
 void update(void)
 {
-	for (int i = 0; i < N_POINTS; i++)
+	/* Wait for frame target time to udate the loop. This is a way to keep FPS consistency on 
+	different machines. Below is a manual, but unperformant way. Use a proper delay function.*/
+	//while (!SDL_TICKS_PASSED(SDL_GetTicks(), previous_frame_time + FRAME_TARGET_TIME));
+	SDL_Delay(FRAME_TARGET_TIME);
+	
+	previous_frame_time = SDL_GetTicks();
+
+	cube_rotation.y += 0.01;
+	cube_rotation.x += 0.01;
+	cube_rotation.z += 0.01;
+
+	// Loop all triangle faces for mesh
+	for (int i = 0; i < N_MESH_FACES; i++)
 	{
-		// Get each point
-		vec3 point = cube_points[i];
+		face mesh_face = mesh_faces[i];
+		
+		vec3 face_verts[3] = { mesh_verts[mesh_face.vert_a - 1], mesh_verts[mesh_face.vert_b - 1], mesh_verts[mesh_face.vert_c - 1] };
 
-		//Simulate moving points away from camera.
-		point.z -= camera_pos.z;
+		triangle projected_tri;
+		/// Loop over all verts of current face and apply transform
+		for (int j = 0; j < 3; j++)
+		{
+			vec3 transformed_vert = face_verts[j];
 
-		//convert cubes points to 2d vector from 3d
-		vec2 projected_point = project(point);
+			transformed_vert = vec3_rotate_x(transformed_vert, cube_rotation.x);
+			transformed_vert = vec3_rotate_y(transformed_vert, cube_rotation.y);
+			transformed_vert = vec3_rotate_z(transformed_vert, cube_rotation.z);
 
-		// Save the new vectors.
-		projected_points[i] = projected_point;
+			//Translate away from camera
+			transformed_vert.z -= camera_pos.z;
+
+			// Project current vertex
+			vec2 projected = project(transformed_vert);
+
+			//Scale and translate to the middle of the screen.
+			projected.x += (window_width / 2);
+			projected.y += (window_height / 2);
+
+			projected_tri.points[j] = projected;
+		}
+
+		tris_to_render[i] = projected_tri;
 	}
-}
 
+
+}
 
 void process_input(void)
 {
