@@ -6,8 +6,9 @@
 #include "display.h"
 #include "vector.h"
 #include "mesh.h"
+#include "array.h"
 
-triangle tris_to_render[N_MESH_FACES];
+triangle* tris_to_render = NULL;
 
 bool is_running = false;
 Uint32 previous_frame_time = 0;
@@ -45,14 +46,23 @@ void render(void)
 {
 	draw_grid(0xFF141414);
 
-	// Loop over all projected tris and render
-	for (int i = 0; i < N_MESH_FACES; i++)
+	 //Loop over all projected tris and render
+	int num_tris = array_length(tris_to_render);
+	for (int i = 0; i < num_tris; i++)
 	{
 		triangle tri = tris_to_render[i];
-		draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFFFF00FF);
-		draw_rectangle(tri.points[1].x, tri.points[1].y, 3, 3, 0xFFFF00FF);
-		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFFFF00FF);
+
+		//draw vertex points
+		draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFF00FF00);
+		draw_rectangle(tri.points[1].x, tri.points[1].y, 3, 3, 0xFF00FF00);
+		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFF00FF00);
+
+		// Connect points with triangles
+		draw_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFF00FF);
 	}
+
+	//Clear tris to render every frame loop
+	array_free(tris_to_render);
 
 	render_color_buffer();
 	clear_color_buffer(0xFF000000);
@@ -76,6 +86,9 @@ void update(void)
 	SDL_Delay(FRAME_TARGET_TIME);
 	
 	previous_frame_time = SDL_GetTicks();
+
+	// Empty tris to render
+	tris_to_render = NULL;
 
 	cube_rotation.y += 0.01;
 	cube_rotation.x += 0.01;
@@ -111,7 +124,8 @@ void update(void)
 			projected_tri.points[j] = projected;
 		}
 
-		tris_to_render[i] = projected_tri;
+		//tris_to_render[i] = projected_tri;
+		array_push(tris_to_render, projected_tri);
 	}
 
 
