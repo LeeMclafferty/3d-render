@@ -1,17 +1,32 @@
 ﻿  main.c
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(56,31): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(56,48): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(57,31): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(57,48): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(58,31): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(58,48): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(61,30): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(61,47): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(61,64): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(61,81): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(61,98): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(61,115): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(93,25): warning C4305: '+=': truncation from 'double' to 'float'
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(94,25): warning C4305: '+=': truncation from 'double' to 'float'
-B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(95,25): warning C4305: '+=': truncation from 'double' to 'float'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(62,30): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(62,47): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(62,64): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(62,81): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(62,98): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(62,115): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(82,25): warning C4090: 'function': different 'const' qualifiers
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\main.c(98,25): warning C4305: '+=': truncation from 'double' to 'float'
+  mesh.c
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(72,22): warning C4047: 'function': 'char *' differs in levels of indirection from 'char *[1024]'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(72,18): warning C4024: 'fgets': different types for formal and actual parameter 1
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(74,25): warning C4047: 'function': 'const char *' differs in levels of indirection from 'char *[1024]'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(74,21): warning C4024: 'strncmp': different types for formal and actual parameter 1
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(77,26): warning C4047: 'function': 'const char *const ' differs in levels of indirection from 'char *[1024]'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(77,22): warning C4024: 'sscanf_s': different types for formal and actual parameter 1
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(81,25): warning C4047: 'function': 'const char *' differs in levels of indirection from 'char *[1024]'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(81,21): warning C4024: 'strncmp': different types for formal and actual parameter 1
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(88,21): warning C4047: 'function': 'const char *const ' differs in levels of indirection from 'char *[1024]'
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\mesh.c(88,17): warning C4024: 'sscanf_s': different types for formal and actual parameter 1
+  tri.c
+  vector.c
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(9,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(10,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(20,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(22,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(32,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(33,27): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(43,9): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+B:\Projects\visual-studio\3d-renderer\3d-renderer\src\vector.c(48,9): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+  Generating Code...
   3d-renderer.vcxproj -> B:\Projects\visual-studio\3d-renderer\Debug\3d-renderer.exe

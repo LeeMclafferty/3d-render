@@ -14,14 +14,15 @@ bool is_running = false;
 Uint32 previous_frame_time = 0;
 
 vec3 camera_pos = { 0, 0, -5 };
-vec3 cube_rotation = { .x = 0, .y = 0, .z = 0 };
-float fov = 650;
+float fov = 1200;
 
 void setup(void);
 void update(void);
 void render(void);
 void process_input(void);
 vec2 project(vec3 point);
+void free_mem();
+
 
 int main(int argc, char* args[])
 {
@@ -38,8 +39,8 @@ int main(int argc, char* args[])
 	 }
 
 	 destroy_window();
-
-	return 0;
+	 free_mem();
+	 return 0;
 }
 
 void render(void)
@@ -53,9 +54,9 @@ void render(void)
 		triangle tri = tris_to_render[i];
 
 		//draw vertex points
-		draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFF00FF00);
+		/*draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFF00FF00);
 		draw_rectangle(tri.points[1].x, tri.points[1].y, 3, 3, 0xFF00FF00);
-		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFF00FF00);
+		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFF00FF00);*/
 
 		// Connect points with triangles
 		draw_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFF00FF);
@@ -76,6 +77,9 @@ void setup(void)
 
 	// Creating a SDL texture that is used to display the color buffer.
 	color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height);
+	
+	const char* file_name = "./assets/ashe.obj";
+	load_obj_file(file_name);
 }
 
 void update(void)
@@ -90,16 +94,21 @@ void update(void)
 	// Empty tris to render
 	tris_to_render = NULL;
 
-	cube_rotation.y += 0.01;
-	cube_rotation.x += 0.01;
-	cube_rotation.z += 0.01;
+	mesh.rotation.x += 0.00;
+	mesh.rotation.y += 0.01;
+	mesh.rotation.z += 0.00;
 
 	// Loop all triangle faces for mesh
-	for (int i = 0; i < N_MESH_FACES; i++)
+	for (int i = 0; i < array_length(mesh.faces); i++)
 	{
-		face mesh_face = mesh_faces[i];
+		face mesh_face = mesh.faces[i];
 		
-		vec3 face_verts[3] = { mesh_verts[mesh_face.vert_a - 1], mesh_verts[mesh_face.vert_b - 1], mesh_verts[mesh_face.vert_c - 1] };
+		vec3 face_verts[3] = 
+		{
+			mesh.verts[mesh_face.vert_a - 1],
+			mesh.verts[mesh_face.vert_b - 1], 
+			mesh.verts[mesh_face.vert_c - 1] 
+		};
 
 		triangle projected_tri;
 		/// Loop over all verts of current face and apply transform
@@ -107,9 +116,9 @@ void update(void)
 		{
 			vec3 transformed_vert = face_verts[j];
 
-			transformed_vert = vec3_rotate_x(transformed_vert, cube_rotation.x);
-			transformed_vert = vec3_rotate_y(transformed_vert, cube_rotation.y);
-			transformed_vert = vec3_rotate_z(transformed_vert, cube_rotation.z);
+			transformed_vert = vec3_rotate_x(transformed_vert, mesh.rotation.x);
+			transformed_vert = vec3_rotate_y(transformed_vert, mesh.rotation.y);
+			transformed_vert = vec3_rotate_z(transformed_vert, mesh.rotation.z);
 
 			//Translate away from camera
 			transformed_vert.z -= camera_pos.z;
@@ -152,4 +161,11 @@ vec2 project(vec3 point)
 	vec2 projected_point = { .x = (point.x * fov) / point.z, .y = (point.y * fov) / point.z };
 
 	return projected_point;
+}
+
+void free_mem()
+{
+	array_free(mesh.faces);
+	array_free(mesh.verts);
+	free(color_buffer);
 }
