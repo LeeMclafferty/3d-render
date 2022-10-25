@@ -43,33 +43,6 @@ int main(int argc, char* args[])
 	 return 0;
 }
 
-void render(void)
-{
-	draw_grid(0xFF141414);
-
-	 //Loop over all projected tris and render
-	int num_tris = array_length(tris_to_render);
-	for (int i = 0; i < num_tris; i++)
-	{
-		triangle tri = tris_to_render[i];
-
-		//draw vertex points
-		/*draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFF00FF00);
-		draw_rectangle(tri.points[1].x, tri.points[1].y, 3, 3, 0xFF00FF00);
-		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFF00FF00);*/
-
-		// Connect points with triangles
-		draw_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFF00FF);
-	}
-
-	//Clear tris to render every frame loop
-	array_free(tris_to_render);
-
-	render_color_buffer();
-	clear_color_buffer(0xFF000000);
-	SDL_RenderPresent(renderer);
-}
-
 void setup(void)
 {
 	// Allocate the required memory in bytes to hold the color buffer
@@ -78,7 +51,7 @@ void setup(void)
 	// Creating a SDL texture that is used to display the color buffer.
 	color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height);
 	
-	const char* file_name = "./assets/ashe.obj";
+	const char* file_name = "./assets/cube.obj";
 	load_obj_file(file_name);
 }
 
@@ -111,6 +84,7 @@ void update(void)
 		};
 
 		triangle projected_tri;
+		vec3 transformed_verts[3];
 		/// Loop over all verts of current face and apply transform
 		for (int j = 0; j < 3; j++)
 		{
@@ -121,10 +95,38 @@ void update(void)
 			transformed_vert = vec3_rotate_z(transformed_vert, mesh.rotation.z);
 
 			//Translate away from camera
-			transformed_vert.z -= camera_pos.z;
+			transformed_vert.z += 5;
 
+			// Save transformed vertex outside of the loop scope.
+			transformed_verts[j] = transformed_vert;
+		}
+
+		// Check for back face culling before projection
+		vec3 vec_a = transformed_verts[0];
+		vec3 vec_b = transformed_verts[1];
+		vec3 vec_c = transformed_verts[2];
+
+		vec3 vec_ab = vec3_difference(vec_b, vec_a);
+		vec3 vec_ac = vec3_difference(vec_c, vec_a);
+
+		/*Find normal*** order matters and will depend on your coordinate system
+		in this case I am using a left handed system*/
+		vec3 normal = cross_product(vec_ab, vec_ac);
+
+		vec3 camera_ray = vec3_difference(camera_pos, vec_a);
+
+		// Check if face is aligned(visible) to the camera
+		float camera_normal_dot = vec3_dot_product(normal, camera_ray);
+		if (camera_normal_dot <= 0)
+		{
+			continue;
+		}
+
+		// projecting faces visible to camera
+		for(int j = 0; j < 3; j++)
+		{
 			// Project current vertex
-			vec2 projected = project(transformed_vert);
+			vec2 projected = project(transformed_verts[j]);
 
 			//Scale and translate to the middle of the screen.
 			projected.x += (window_width / 2);
@@ -136,8 +138,34 @@ void update(void)
 		//tris_to_render[i] = projected_tri;
 		array_push(tris_to_render, projected_tri);
 	}
+}
 
 
+void render(void)
+{
+	draw_grid(0xFF141414);
+
+	//Loop over all projected tri faces and render
+	int num_tris = array_length(tris_to_render);
+	for (int i = 0; i < num_tris; i++)
+	{
+		triangle tri = tris_to_render[i];
+
+		//draw vertex points
+		/*draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFF00FF00);
+		draw_rectangle(tri.points[1].x, tri.points[1].y, 3, 3, 0xFF00FF00);
+		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFF00FF00);*/
+
+		// Connect points with triangles
+		draw_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFF00FF);
+	}
+
+	//Clear tris to render every frame loop
+	array_free(tris_to_render);
+
+	render_color_buffer();
+	clear_color_buffer(0xFF000000);
+	SDL_RenderPresent(renderer);
 }
 
 void process_input(void)
