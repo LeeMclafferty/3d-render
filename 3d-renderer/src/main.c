@@ -21,7 +21,7 @@ void update(void);
 void render(void);
 void process_input(void);
 vec2 project(vec3 point);
-void free_mem();
+void free_mem(void);
 
 
 int main(int argc, char* args[])
@@ -45,6 +45,10 @@ int main(int argc, char* args[])
 
 void setup(void)
 {
+	// Init states
+	render_state = RENDER_WIRE;
+	cull_state = CULL_BACKFACE;
+
 	// Allocate the required memory in bytes to hold the color buffer
 	color_buffer = (uint32_t*)malloc(sizeof(uint32_t) * window_width * window_height);
 
@@ -57,33 +61,30 @@ void setup(void)
 
 void update(void)
 {
-	/* Wait for frame target time to udate the loop. This is a way to keep FPS consistency on 
-	different machines. Below is a manual, but unperformant way. Use a proper delay function.*/
-	//while (!SDL_TICKS_PASSED(SDL_GetTicks(), previous_frame_time + FRAME_TARGET_TIME));
-	SDL_Delay(FRAME_TARGET_TIME);
+	int time_to_wait = FRAME_TARGET_TIME - (SDL_GetTicks() - previous_frame_time);
+
+	if(time_to_wait > 0 && time_to_wait <= FRAME_TARGET_TIME)
+		SDL_Delay(FRAME_TARGET_TIME);
 	
 	previous_frame_time = SDL_GetTicks();
 
 	// Empty tris to render
 	tris_to_render = NULL;
 
-	mesh.rotation.x += 0.00;
+	mesh.rotation.x += 0.01;
 	mesh.rotation.y += 0.01;
-	mesh.rotation.z += 0.00;
+	mesh.rotation.z += 0.02;
 
 	// Loop all triangle faces for mesh
 	for (int i = 0; i < array_length(mesh.faces); i++)
 	{
 		face mesh_face = mesh.faces[i];
 		
-		vec3 face_verts[3] = 
-		{
-			mesh.verts[mesh_face.vert_a - 1],
-			mesh.verts[mesh_face.vert_b - 1], 
-			mesh.verts[mesh_face.vert_c - 1] 
-		};
+		vec3 face_verts[3];
+		face_verts[0] = mesh.verts[mesh_face.vert_a - 1];
+		face_verts[1] = mesh.verts[mesh_face.vert_b - 1];
+		face_verts[2] = mesh.verts[mesh_face.vert_c - 1];
 
-		triangle projected_tri;
 		vec3 transformed_verts[3];
 		/// Loop over all verts of current face and apply transform
 		for (int j = 0; j < 3; j++)
@@ -101,27 +102,36 @@ void update(void)
 			transformed_verts[j] = transformed_vert;
 		}
 
-		// Check for back face culling before projection
-		vec3 vec_a = transformed_verts[0];
-		vec3 vec_b = transformed_verts[1];
-		vec3 vec_c = transformed_verts[2];
-
-		vec3 vec_ab = vec3_difference(vec_b, vec_a);
-		vec3 vec_ac = vec3_difference(vec_c, vec_a);
-
-		/*Find normal*** order matters and will depend on your coordinate system
-		in this case I am using a left handed system*/
-		vec3 normal = cross_product(vec_ab, vec_ac);
-
-		vec3 camera_ray = vec3_difference(camera_pos, vec_a);
-
-		// Check if face is aligned(visible) to the camera
-		float camera_normal_dot = vec3_dot_product(normal, camera_ray);
-		if (camera_normal_dot <= 0)
+		if (cull_state == CULL_BACKFACE)
 		{
-			continue;
+			// Check for back face culling before projection
+			vec3 vec_a = transformed_verts[0];
+			vec3 vec_b = transformed_verts[1];
+			vec3 vec_c = transformed_verts[2];
+
+			vec3 vec_ab = vec3_difference(vec_b, vec_a);
+			vec3 vec_ac = vec3_difference(vec_c, vec_a);
+			vec3_normalize(&vec_ab);
+			vec3_normalize(&vec_ac);
+
+			/*Find normal*** order matters and will depend on your coordinate system
+			in this case I am using a left handed system*/
+			vec3 normal = cross_product(vec_ab, vec_ac);
+
+			//Normalize the face normal
+			vec3_normalize(&normal);
+
+			vec3 camera_ray = vec3_difference(camera_pos, vec_a);
+
+			// Check if face is aligned(visible) to the camera
+			float camera_normal_dot = vec3_dot_product(normal, camera_ray);
+			if (camera_normal_dot < 0) 
+			{
+				continue;
+			}
 		}
 
+		triangle projected_tri;
 		// projecting faces visible to camera
 		for(int j = 0; j < 3; j++)
 		{
@@ -140,7 +150,6 @@ void update(void)
 	}
 }
 
-
 void render(void)
 {
 	draw_grid(0xFF141414);
@@ -151,13 +160,30 @@ void render(void)
 	{
 		triangle tri = tris_to_render[i];
 
-		//draw vertex points
-		/*draw_rectangle(tri.points[0].x, tri.points[0].y, 3, 3, 0xFF00FF00);
-		draw_rectangle(tri.points[1].x, tri.points[1].y, 3, 3, 0xFF00FF00);
-		draw_rectangle(tri.points[2].x, tri.points[2].y, 3, 3, 0xFF00FF00);*/
+		//Draw filled tris (faces) instead of wire frame.
+		if (render_state == RENDER_FILL_TRIANGLE || render_state == RENDER_FILL_TRIANGLE_WIRE)
+		{
+			draw_filled_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFFFFFF);
+		}
 
-		// Connect points with triangles
-		draw_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFF00FF);
+		// Connect points with triangles (wireframe)
+		if (render_state == RENDER_FILL_TRIANGLE_WIRE)
+		{
+			draw_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFF000000);
+		}
+		// If drawing just the wire frame, render it as white so it doesnt blend to background.
+		else if (render_state == RENDER_WIRE || render_state == RENDER_WIRE_VERTEX)
+		{
+			draw_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFFFFFF);
+		}
+
+		//draw vertex points (not drawing )
+		if (render_state == RENDER_WIRE_VERTEX)
+		{
+			draw_rectangle(tri.points[0].x - 3, tri.points[0].y - 3, 6, 6, 0xFFFF0000);
+			draw_rectangle(tri.points[1].x - 3, tri.points[1].y - 3, 6, 6, 0xFFFF0000);
+			draw_rectangle(tri.points[2].x - 3, tri.points[2].y - 3, 6, 6, 0xFFFF0000);
+		}
 	}
 
 	//Clear tris to render every frame loop
@@ -175,12 +201,28 @@ void process_input(void)
 
 	switch (event.type)
 	{
-	case SDL_QUIT:
-		is_running = false;
-		break;
-	case SDL_KEYDOWN:
-		if (event.key.keysym.sym == SDLK_ESCAPE) // if Polled event is esacpe the quit.
+		case SDL_QUIT:
 			is_running = false;
+			break;
+		case SDL_KEYDOWN:
+			if (event.key.keysym.sym == SDLK_ESCAPE) // if Polled event is esacpe the quit.
+				is_running = false;
+			if (event.key.keysym.sym == SDLK_1)
+				render_state = RENDER_WIRE_VERTEX;
+			if (event.key.keysym.sym == SDLK_2)
+				render_state = RENDER_WIRE;
+			if (event.key.keysym.sym == SDLK_3)
+				render_state = RENDER_FILL_TRIANGLE;
+			if (event.key.keysym.sym == SDLK_4)
+				render_state = RENDER_FILL_TRIANGLE_WIRE;
+			if (event.key.keysym.sym == SDLK_d)
+			{
+				if (cull_state == CULL_NONE)
+					cull_state = CULL_BACKFACE;
+				else
+					cull_state = CULL_NONE;
+			}
+			break;
 	}
 }
 
@@ -191,7 +233,7 @@ vec2 project(vec3 point)
 	return projected_point;
 }
 
-void free_mem()
+void free_mem(void)
 {
 	array_free(mesh.faces);
 	array_free(mesh.verts);
