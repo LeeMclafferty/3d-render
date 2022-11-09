@@ -55,8 +55,10 @@ void setup(void)
 	// Creating a SDL texture that is used to display the color buffer.
 	color_buffer_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, window_width, window_height);
 	
-	const char* file_name = "./assets/cube.obj";
-	load_obj_file(file_name);
+	//const char* file_name = "./assets/cube.obj";
+	//load_obj_file(file_name);
+
+	load_cube_mesh_data();
 }
 
 void update(void)
@@ -73,7 +75,7 @@ void update(void)
 
 	mesh.rotation.x += 0.01;
 	mesh.rotation.y += 0.01;
-	mesh.rotation.z += 0.02;
+	mesh.rotation.z += 0.01;
 
 	// Loop all triangle faces for mesh
 	for (int i = 0; i < array_length(mesh.faces); i++)
@@ -125,28 +127,41 @@ void update(void)
 
 			// Check if face is aligned(visible) to the camera
 			float camera_normal_dot = vec3_dot_product(normal, camera_ray);
-			if (camera_normal_dot < 0) 
+			
+			if (camera_normal_dot < 1) 
 			{
 				continue;
 			}
 		}
 
-		triangle projected_tri;
+		vec2 projected_points[3];
 		// projecting faces visible to camera
-		for(int j = 0; j < 3; j++)
+		for (int j = 0; j < 3; j++)
 		{
 			// Project current vertex
-			vec2 projected = project(transformed_verts[j]);
+			projected_points[j] = project(transformed_verts[j]);
 
 			//Scale and translate to the middle of the screen.
-			projected.x += (window_width / 2);
-			projected.y += (window_height / 2);
-
-			projected_tri.points[j] = projected;
+			projected_points[j].x += (window_width / 2);
+			projected_points[j].y += (window_height / 2);
 		}
 
-		//tris_to_render[i] = projected_tri;
-		array_push(tris_to_render, projected_tri);
+			triangle projected_tri =
+			{
+				.points = 
+				{
+					{ projected_points[0].x, projected_points[0].y },
+					{ projected_points[1].x, projected_points[1].y },
+					{ projected_points[2].x, projected_points[2].y },
+				},
+				.color = mesh_face.color
+			};
+
+			//tris_to_render[i] = projected_tri;
+			array_push(tris_to_render, projected_tri);
+		
+
+
 	}
 }
 
@@ -163,7 +178,7 @@ void render(void)
 		//Draw filled tris (faces) instead of wire frame.
 		if (render_state == RENDER_FILL_TRIANGLE || render_state == RENDER_FILL_TRIANGLE_WIRE)
 		{
-			draw_filled_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, 0xFFFFFFFF);
+			draw_filled_triangle(tri.points[0].x, tri.points[0].y, tri.points[1].x, tri.points[1].y, tri.points[2].x, tri.points[2].y, tri.color);
 		}
 
 		// Connect points with triangles (wireframe)
